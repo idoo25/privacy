@@ -1,0 +1,7 @@
+# requirements.txt
+numpy>=1.21.0
+opencv-python>=4.5.0
+onnxruntime>=1.10.0  # or onnxruntime-gpu for Jetson
+scikit-learn>=1.0.0
+schedule>=1.1.0
+pyyaml>=6.0
