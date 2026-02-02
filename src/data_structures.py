@@ -2,11 +2,13 @@
 Data Structures Module
 
 Contains data classes for detection events and trajectories.
+Optimized for efficient operations with large datasets.
 """
 
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, List
+import bisect
 
 
 @dataclass
@@ -22,6 +24,10 @@ class DetectionEvent:
     
     # NOTE: Raw features are NEVER stored
     # Only the hashed token is persisted
+    
+    def __lt__(self, other: 'DetectionEvent') -> bool:
+        """Enable sorting by timestamp."""
+        return self.timestamp < other.timestamp
 
 
 @dataclass
@@ -29,6 +35,11 @@ class DailyTrajectory:
     """
     Reconstructed trajectory for a single token.
     Automatically deleted at 00:00.
+    
+    Optimized with:
+    - Bisect-based sorted insertion (O(log n) vs O(n log n))
+    - Cached derived values
+    - Lazy updates for computed properties
     """
     
     token: str
@@ -36,30 +47,61 @@ class DailyTrajectory:
     first_seen: Optional[datetime] = None
     last_seen: Optional[datetime] = None
     stations_visited: List[str] = field(default_factory=list)
+    _is_sorted: bool = field(default=True, repr=False)
+    _round_trip_cached: Optional[bool] = field(default=None, repr=False)
     
     def __post_init__(self):
         if self.events:
-            self._update_from_events()
+            self._ensure_sorted()
+            self._update_bounds()
     
-    def _update_from_events(self):
-        """Update derived fields from events."""
+    def _ensure_sorted(self):
+        """Ensure events are sorted by timestamp."""
+        if not self._is_sorted:
+            self.events.sort(key=lambda e: e.timestamp)
+            self._is_sorted = True
+            self.stations_visited = [e.station_id for e in self.events]
+    
+    def _update_bounds(self):
+        """Update first_seen and last_seen from events."""
         if self.events:
-            sorted_events = sorted(self.events, key=lambda e: e.timestamp)
-            self.first_seen = sorted_events[0].timestamp
-            self.last_seen = sorted_events[-1].timestamp
-            self.stations_visited = [e.station_id for e in sorted_events]
+            self._ensure_sorted()
+            self.first_seen = self.events[0].timestamp
+            self.last_seen = self.events[-1].timestamp
+            self.stations_visited = [e.station_id for e in self.events]
     
     def add_event(self, event: DetectionEvent):
-        """Add an event to the trajectory."""
-        self.events.append(event)
-        self._update_from_events()
+        """
+        Add an event to the trajectory using bisect for O(log n) insertion.
+        Utilizes the __lt__ operator on DetectionEvent for direct comparison.
+        """
+        # Use bisect with the event's __lt__ method - O(log n) search
+        insert_pos = bisect.bisect_left(self.events, event)
+        self.events.insert(insert_pos, event)
+        
+        # Update stations_visited at the correct position
+        self.stations_visited.insert(insert_pos, event.station_id)
+        
+        # Update bounds efficiently
+        if self.first_seen is None or event.timestamp < self.first_seen:
+            self.first_seen = event.timestamp
+        if self.last_seen is None or event.timestamp > self.last_seen:
+            self.last_seen = event.timestamp
+        
+        # Invalidate cached round trip status
+        self._round_trip_cached = None
     
     @property
     def is_round_trip(self) -> bool:
-        """Check if trajectory starts and ends at same station."""
+        """Check if trajectory starts and ends at same station (cached)."""
+        if self._round_trip_cached is not None:
+            return self._round_trip_cached
+        
         if len(self.stations_visited) < 2:
-            return False
-        return self.stations_visited[0] == self.stations_visited[-1]
+            self._round_trip_cached = False
+        else:
+            self._round_trip_cached = self.stations_visited[0] == self.stations_visited[-1]
+        return self._round_trip_cached
 
 
 @dataclass

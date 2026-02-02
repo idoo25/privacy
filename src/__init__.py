@@ -8,6 +8,7 @@ from .privacy_token import PrivacyTokenGenerator
 from .data_structures import DetectionEvent, DailyTrajectory
 from .trajectory import TrajectoryBuilder
 from .analytics import Analytics, OccupancyMonitor, PlanningReport
+from .station_graph import StationGraph
 
 __version__ = "1.0.0"
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "Analytics",
     "OccupancyMonitor",
     "PlanningReport",
+    "StationGraph",
 ]
