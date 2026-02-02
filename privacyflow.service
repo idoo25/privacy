@@ -1,0 +1,63 @@
+# PrivacyFlow Systemd Service
+# 
+# Installation:
+#   1. Copy to: sudo cp privacyflow.service /etc/systemd/system/
+#   2. Reload: sudo systemctl daemon-reload
+#   3. Enable: sudo systemctl enable privacyflow
+#   4. Start: sudo systemctl start privacyflow
+#   5. Status: sudo systemctl status privacyflow
+#   6. Logs: sudo journalctl -u privacyflow -f
+
+[Unit]
+Description=PrivacyFlow - Privacy-Preserving Person Detection
+Documentation=https://github.com/username/privacyflow
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=video
+
+# Working directory
+WorkingDirectory=/home/pi/privacyflow
+
+# Virtual environment activation and run
+ExecStart=/home/pi/privacyflow/venv/bin/python main.py \
+    --config config.yaml \
+    --station-id station_001 \
+    --camera 0 \
+    --api-port 5000 \
+    --headless
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/home/pi
+Environment=PATH=/home/pi/privacyflow/venv/bin:/usr/local/bin:/usr/bin:/bin
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=privacyflow
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/pi/privacyflow/data /home/pi/privacyflow/logs
+PrivateTmp=true
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=200%
+
+# Watchdog
+WatchdogSec=60
+NotifyAccess=main
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+# Raspberry Pi specific overrides
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.rpi.yml up -d
+
+version: '3.8'
+
+services:
+  privacyflow:
+    # Use ARM-compatible base image
+    build:
+      context: .
+      dockerfile: Dockerfile.rpi
+    
+    # Camera access
+    devices:
+      # USB Camera
+      - /dev/video0:/dev/video0
+      # Raspberry Pi Camera (via V4L2)
+      - /dev/vchiq:/dev/vchiq
+    
+    # Required for camera access
+    privileged: false
+    group_add:
+      - video
+    
+    # Optimized resource limits for Pi
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 768M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    
+    environment:
+      # Use Pi-optimized settings
+      - LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/libatomic.so.1
