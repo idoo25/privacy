@@ -5,7 +5,7 @@ WARNING: These features are intentionally volatile.
 Changing clothes = new identity (by design).
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -213,7 +213,7 @@ class AppearanceExtractor:
             result[:, :] = mean_val / self.color_bins
             return result
     
-    def _detect_accessories(self, person_crop: np.ndarray) -> Dict[str, any]:
+    def _detect_accessories(self, person_crop: np.ndarray) -> Dict[str, Any]:
         """
         Detect accessories in person crop.
         
@@ -260,7 +260,7 @@ class AppearanceExtractor:
     def _encode_appearance(self,
                            upper_colors: np.ndarray,
                            lower_colors: np.ndarray,
-                           accessories: Dict[str, any]) -> np.ndarray:
+                           accessories: Dict[str, Any]) -> np.ndarray:
         """
         Encode appearance features into a fixed-size vector.
         
