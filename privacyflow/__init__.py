@@ -12,6 +12,8 @@ from privacyflow.models.detection import DetectionEvent, DailyTrajectory
 from privacyflow.models.token import PrivacyTokenGenerator
 from privacyflow.tracking.detector import PersonDetector
 from privacyflow.tracking.trajectory import TrajectoryBuilder
+from privacyflow.camera import CameraCapture, CameraConfig, list_cameras, get_camera_info
+from privacyflow.detectors import YOLOv8Detector, MoveNetPoseEstimator
 
 __version__ = "0.1.0"
 __all__ = [
@@ -21,4 +23,10 @@ __all__ = [
     "PrivacyTokenGenerator",
     "PersonDetector",
     "TrajectoryBuilder",
+    "CameraCapture",
+    "CameraConfig",
+    "list_cameras",
+    "get_camera_info",
+    "YOLOv8Detector",
+    "MoveNetPoseEstimator",
 ]
