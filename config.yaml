@@ -1,0 +1,66 @@
+# config.yaml - PrivacyFlow Configuration Template
+
+system:
+  device_id: "station_001"
+  timezone: "UTC"
+  log_level: "INFO"
+
+privacy:
+  # Face detection resolution (DO NOT INCREASE)
+  face_resolution: [32, 32]
+  
+  # Token generation
+  hash_algorithm: "sha256"
+  token_length: 16
+  daily_salt_rotation: true
+  
+  # Data retention
+  purge_time: "00:00"
+  retain_aggregates_days: 30  # Only aggregate stats
+  retain_raw_detections: false
+
+detection:
+  # Camera settings
+  camera_index: 0
+  frame_width: 640
+  frame_height: 480
+  fps: 30
+  
+  # Detection thresholds
+  person_confidence_threshold: 0.6
+  face_confidence_threshold: 0.5
+  min_detection_size: [50, 100]  # Minimum person bbox
+  
+  # Tracking
+  max_disappeared_frames: 30
+  max_distance_threshold: 100
+
+features:
+  # Face embedding
+  face_model: "models/face_encoder_32x32.onnx"
+  face_embedding_dim: 64
+  
+  # Body proportions
+  pose_model: "models/pose_lite.onnx"
+  body_feature_dim: 8
+  
+  # Appearance
+  appearance_model: "models/appearance_encoder.onnx"
+  appearance_feature_dim: 32
+  color_quantization_bins: 8
+
+matching:
+  # Token matching for trajectory building
+  similarity_threshold: 0.85
+  temporal_window_seconds: 300  # 5 minute max gap
+  
+analytics:
+  # Aggregate statistics
+  aggregation_interval_minutes: 60
+  min_samples_for_stats: 10
+  
+output:
+  # Export settings
+  export_format: "json"
+  export_path: "/data/exports/"
+  export_only_aggregates: true  # Never export raw detections

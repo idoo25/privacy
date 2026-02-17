@@ -1,0 +1,22 @@
+# requirements.txt - PrivacyFlow Dependencies
+
+# Core
+numpy>=1.21.0
+opencv-python>=4.5.0
+onnxruntime>=1.10.0  # or onnxruntime-gpu for GPU support
+
+# ML & Data
+scikit-learn>=1.0.0
+
+# Scheduling
+schedule>=1.1.0
+
+# Configuration
+pyyaml>=6.0
+
+# Model download (optional but recommended)
+huggingface_hub>=0.20.0
+
+# For Raspberry Pi / Jetson (optional)
+# onnxruntime-gpu>=1.10.0  # Uncomment for Jetson
+# picamera2>=0.3.0          # Uncomment for Pi Camera Module
